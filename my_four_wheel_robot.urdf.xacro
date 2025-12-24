@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+<robot name="visual">
+
+	<material name="blue">
+		<color rgba="0 0 1 1"/>
+	</material>
+	<material name="black">
+		<color rgba="0 0 0 1"/>
+	</material>
+	<material name="white">
+		<color rgba="1 1 1 1"/>
+	</material>
+
+	<!-- Odom link (корень без инерции) -->
+	<link name="odom"/>
+
+	<!-- Основная платформа (с инерцией) -->
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<box size="0.24 0.14 0.03"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.24 0.14 0.03"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="25"/>
+			<inertia ixx="0.126164" ixy="0" ixz="0"
+			         iyy="0.416519" iyz="0" izz="0.481014"/>
+		</inertial>
+	</link>
+
+	<link name="base_footprint">
+	</link>
+	
+	<joint name="base_footprint_joint" type="fixed">
+	  <parent link="base_link"/>
+	  <child link="base_footprint"/>
+	  <!-- Смещение (xyz) и ориентация (rpy) лидара относительно base_link -->
+	  <origin xyz="0 0 0" rpy="0 0 0"/>
+	</joint>
+	
+  <!--лидар -->
+<link name="lidar_link">
+  <visual>
+    <geometry>
+      <cylinder length="0.05" radius="0.035"/>
+    </geometry>
+    <material name="black">
+      <color rgba="0 0 0 1"/>
+    </material>
+  </visual>
+  <collision>
+    <geometry>
+      <cylinder length="0.05" radius="0.035"/>
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="0.1" />
+    <origin xyz="0 0 0"/>
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+  </inertial>
+</link>
+
+<!-- Фиксированный шарнир между базой и лидаром -->
+<joint name="lidar_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="lidar_link"/>
+  <!-- Смещение (xyz) и ориентация (rpy) лидара относительно base_link -->
+  <origin xyz="0 0 0.2" rpy="0 0 0"/>
+</joint>
+
+	<joint name="base_link_joint" type="fixed">
+		<parent link="odom"/>
+		<child link="base_link"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+	</joint>
+
+	<!-- Промежуточное звено (left_base) -->
+	<link name="left_base">
+		<visual>
+			<geometry>
+				<box size="0.01 0.01 0.01"/>
+			</geometry>
+		</visual>
+	</link>
+
+	<joint name="left_base_joint" type="fixed">
+		<parent link="base_link"/>
+		<child link="left_base"/>
+		<!-- Joint находится в позиции оси колеса -->
+		<origin xyz="0.06 0.04 -0.015"/>
+	</joint>
+
+	<!-- Левое колесо -->
+	<link name="left_wheel">
+		<visual>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
+			<geometry>
+				<cylinder length="0.025" radius="0.0335"/>
+			</geometry>
+			<material name="blue"/>
+		</visual>
+		<collision>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
+			<geometry>
+				<cylinder length="0.025" radius="0.0335"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="2.5"/>
+			<inertia ixx="0.145833" ixy="0" ixz="0"
+			         iyy="0.145833" iyz="0" izz="0.125"/>
+		</inertial>
+	</link>
+
+	<joint name="left_wheel_joint" type="continuous">
+		<axis xyz="0 1 0"/>
+		<parent link="left_base"/>
+		<child link="left_wheel"/>
+		<!-- Колесо на нулевой позиции относительно промежуточного звена -->
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<command_interface name="velocity"/><!-- управляем скорость колеса -->
+		<state_interface name="position"/><!-- состояние: пройденный угол -->
+		<state_interface name="velocity"/><!-- состояние: текущая скорость -->
+	</joint>
+  
+  <link name="caster_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0335"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0335"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="6"/>
+      <inertia ixx="1e-4" ixy="0" ixz="0"
+               iyy="1e-3" iyz="0" izz="1e-3"/>
+    </inertial>
+  </link>
+  <joint name="caster_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_wheel"/>
+    <origin xyz="-0.06 0 -0.015" rpy="0 0 0"/>
+  </joint>
+  
+
+	<!-- Левое колесо -->
+
+
+	
+	<!-- Промежуточное звено (right_base) -->
+	<link name="right_base">
+		<visual>
+			<geometry>
+				<box size="0.01 0.01 0.01"/>
+			</geometry>
+		</visual>
+	</link>
+
+	<joint name="right_base_joint" type="fixed">
+		<parent link="base_link"/>
+		<child link="right_base"/>
+		<!-- Joint находится в позиции оси колеса -->
+		<origin xyz="0.06 -0.04 -0.015"/>
+	</joint>
+
+	<!-- Правое колесо -->
+	<link name="right_wheel">
+		<visual>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
+			<geometry>
+				<cylinder length="0.025" radius="0.0335"/>
+			</geometry>
+			<material name="blue"/>
+		</visual>
+		<collision>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
+			<geometry>
+				<cylinder length="0.025" radius="0.0335"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="2.5"/>
+			<inertia ixx="0.145833" ixy="0" ixz="0"
+			         iyy="0.145833" iyz="0" izz="0.125"/>
+		</inertial>
+	</link>
+
+	<joint name="right_wheel_joint" type="continuous">
+		<axis xyz="0 1 0"/>
+		<parent link="right_base"/>
+		<child link="right_wheel"/>
+		<!-- Колесо на нулевой позиции относительно промежуточного звена -->
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<command_interface name="velocity"/><!-- управляем скорость колеса -->
+		<state_interface name="position"/><!-- состояние: пройденный угол -->
+		<state_interface name="velocity"/><!-- состояние: текущая скорость -->
+	</joint>
+	
+  
+  
+  
+
+  
+  
+  
+  
+	<ros2_control name="my_robot_hardware" type="system">
+		<hardware>
+			<!-- Подключаем эмуляцию аппаратной части: GenericSystem с вычислением динамики -->
+			<plugin>mock_components/GenericSystem</plugin>
+			<!-- <plugin>gazebo_ros2_control/GazeboSystemmock_components/GenericSystem</plugin>-->
+			 <param name="update_rate" type="int">50</param>
+			<param name="calculate_dynamics" type="bool">true</param>
+		</hardware>
+		<!-- Описание управляемых шарниров -->
+		<joint name="left_wheel_joint">
+			<command_interface name="velocity"/><!-- управляем скорость колеса -->
+			<state_interface name="position"/><!-- состояние: пройденный угол -->
+			<state_interface name="velocity"/><!-- состояние: текущая скорость -->
+		</joint>
+		<joint name="right_wheel_joint">
+			<command_interface name="velocity"/>
+			<state_interface name="position"/>
+			<state_interface name="velocity"/>
+		</joint>
+	</ros2_control>
+
+
+</robot>
